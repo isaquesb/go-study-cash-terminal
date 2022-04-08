@@ -95,7 +95,7 @@ func TestTerminal_SimpleScenery(t *testing.T) {
 		t.Errorf("got %d sceneries, expected 1", l)
 		return
 	}
-	notes := sceneries[0].Cash
+	notes := sceneries[0].Pieces
 	if num := len(notes); num != 2 {
 		t.Errorf("got %d notes, expected 2", num)
 	}
@@ -153,7 +153,7 @@ func TestTerminal_ManySceneries(t *testing.T) {
 		},
 	}
 	for j, currentCase := range cases {
-		notes := sceneries[j].Cash
+		notes := sceneries[j].Pieces
 		for i, v := range currentCase.n {
 			if notes[i].Quantity != v.q {
 				t.Errorf("Scenery %d: Quantity got %d x %d, expected %d", j, notes[i].Quantity, notes[i].Value, v.q)

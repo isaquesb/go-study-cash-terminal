@@ -6,25 +6,29 @@ import (
 	"sort"
 )
 
+const (
+	SUGGEST_MAX = 3
+)
+
 type Scenery struct {
-	Cash []*Node
+	Pieces []*Slot
 }
 
-type Node struct {
+type Slot struct {
 	Value    int
 	Quantity int
 }
 
 type Terminal struct {
-	slots     []*Node
-	slotIndex map[int]*Node
+	slots     []*Slot
+	slotIndex map[int]*Slot
 	total     int
 }
 
 func NewTerminal() *Terminal {
 	return &Terminal{
-		slots:     make([]*Node, 0),
-		slotIndex: map[int]*Node{},
+		slots:     make([]*Slot, 0),
+		slotIndex: map[int]*Slot{},
 		total:     0,
 	}
 }
@@ -40,16 +44,16 @@ func (t *Terminal) Add(value, quantity int) int {
 	return t.total
 }
 
-func (t *Terminal) Available() []*Node {
+func (t *Terminal) Available() []*Slot {
 	sort.SliceStable(t.slots, func(i, j int) bool {
 		return t.slots[i].Value > t.slots[j].Value
 	})
 	return t.slots
 }
 
-func (t *Terminal) GetSlot(value int) *Node {
+func (t *Terminal) GetSlot(value int) *Slot {
 	if nil == t.slotIndex[value] {
-		n := &Node{
+		n := &Slot{
 			Value:    value,
 			Quantity: 0,
 		}
@@ -59,64 +63,67 @@ func (t *Terminal) GetSlot(value int) *Node {
 	return t.slotIndex[value]
 }
 
-func (t *Terminal) getSceneryFor(required, half int) (*Scenery, error) {
-	newScenery := &Scenery{
-		Cash: make([]*Node, 0),
-	}
-	left := required
-	fmt.Println("============================")
-	fmt.Println(half)
-	for _, scenery := range t.Available() {
-		if left < scenery.Value {
-			continue
-		}
-		notes := left / scenery.Value
-		if half > 0 && scenery.Value >= half {
-			notes = notes / 2
-		}
-		if notes > scenery.Quantity {
-			notes = scenery.Quantity
-		}
-		node := &Node{
-			Value:    scenery.Value,
-			Quantity: notes,
-		}
-		left -= scenery.Value * notes
-		newScenery.Cash = append(newScenery.Cash, node)
-	}
-	if left == 0 {
-		return newScenery, nil
-	}
-	min := newScenery.Cash[len(newScenery.Cash)-1]
-	slot := t.GetSlot(min.Value)
-	return nil, errors.New(fmt.Sprintf(
-		"need %d, used %d x R$ %d for total %d notes",
-		left,
-		min.Quantity,
-		min.Value,
-		slot.Quantity,
-	))
-}
-
 func (t *Terminal) GetSceneriesFor(required int) ([]*Scenery, error) {
 	if required > t.Total() {
 		return nil, errors.New("overflow required")
 	}
 	sceneries := make([]*Scenery, 0)
-	half := 0
+	halfBase := 0
 	halfCount := 0
-	for i := 1; i <= 3; i++ {
-		newScenery, err := t.getSceneryFor(required, half)
+	for i := 1; i <= SUGGEST_MAX; i++ {
+		newScenery, err := t.getSceneryFor(required, halfBase)
 		if nil == err {
 			sceneries = append(sceneries, newScenery)
-			half = newScenery.Cash[halfCount].Value
+			halfBase = newScenery.Pieces[halfCount].Value
 			halfCount++
-		} else {
-			fmt.Println(err.Error())
 		}
 	}
 	if 0 == len(sceneries) {
 		return nil, errors.New("nothing sceneries")
 	}
 	return sceneries, nil
+}
+
+func (t *Terminal) getSceneryFor(required, halfBase int) (*Scenery, error) {
+	scenery := &Scenery{
+		Pieces: make([]*Slot, 0),
+	}
+	need := required
+	for _, terminalSlot := range t.Available() {
+		slot := t.getSlotPiece(terminalSlot, need, halfBase)
+		if slot == nil {
+			continue
+		}
+		need -= slot.Value * slot.Quantity
+		scenery.Pieces = append(scenery.Pieces, slot)
+	}
+	if need == 0 {
+		return scenery, nil
+	}
+	min := scenery.Pieces[len(scenery.Pieces)-1]
+	slot := t.GetSlot(min.Value)
+	return nil, errors.New(fmt.Sprintf(
+		"need %d, used %d x R$ %d for total %d notes",
+		need,
+		min.Quantity,
+		min.Value,
+		slot.Quantity,
+	))
+}
+
+func (t *Terminal) getSlotPiece(scenery *Slot, need, halfBase int) *Slot {
+	if need < scenery.Value {
+		return nil
+	}
+	notes := need / scenery.Value
+	if halfBase > 0 && scenery.Value >= halfBase {
+		notes = notes / 2
+	}
+	if notes > scenery.Quantity {
+		notes = scenery.Quantity
+	}
+	return &Slot{
+		Value:    scenery.Value,
+		Quantity: notes,
+	}
 }
