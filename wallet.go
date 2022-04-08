@@ -2,10 +2,6 @@ package main
 
 import "errors"
 
-const (
-	SUGGEST_MAX = 3
-)
-
 type Wallet struct {
 	slots Slots
 	index map[int]*Slot

@@ -4,6 +4,10 @@ import (
 	"errors"
 )
 
+const (
+	SUGGEST_MAX = 3
+)
+
 type Request struct {
 	Value int
 }
