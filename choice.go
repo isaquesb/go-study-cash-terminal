@@ -2,13 +2,13 @@ package main
 
 import "sort"
 
-type Scenery struct {
+type Choice struct {
 	Pieces Slots
 }
 
-func NewScenery(available Slots, value, halfBase int) (*Scenery, int) {
+func NewChoice(available Slots, value, halfBase int) (*Choice, int) {
 	sortAvailable(available)
-	scenery := &Scenery{
+	choice := &Choice{
 		Pieces: make(Slots, 0),
 	}
 	rest := value
@@ -18,9 +18,9 @@ func NewScenery(available Slots, value, halfBase int) (*Scenery, int) {
 			continue
 		}
 		rest -= piece.Value * piece.Quantity
-		scenery.Pieces = append(scenery.Pieces, piece)
+		choice.Pieces = append(choice.Pieces, piece)
 	}
-	return scenery, rest
+	return choice, rest
 }
 
 func sortAvailable(available Slots) {

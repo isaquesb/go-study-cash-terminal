@@ -20,36 +20,36 @@ func TestRequest_Overflow(t *testing.T) {
 	}
 }
 
-func TestRequest_WithoutSceneries(t *testing.T) {
+func TestRequest_WithoutChoices(t *testing.T) {
 	wallet := cash.NewWallet()
 	wallet.Add(5, 2)
 	wallet.Add(100, 3)
 	wallet.Add(10, 20)
 	request, err := wallet.Request(11)
-	sceneries, err := request.GetSceneries(wallet.Available())
-	if nil != sceneries {
-		t.Error("Has scenery")
+	choices, err := request.GetChoices(wallet.Available())
+	if nil != choices {
+		t.Error("Has choice")
 	}
-	if "nothing sceneries" != err.Error() {
+	if "nothing choices" != err.Error() {
 		t.Error("Unexpected error: " + err.Error())
 	}
 }
 
-func TestRequest_SimpleScenery(t *testing.T) {
+func TestRequest_SimpleChoice(t *testing.T) {
 	wallet := cash.NewWallet()
 	wallet.Add(5, 2)
 	wallet.Add(100, 3)
 	wallet.Add(10, 20)
 	request, err := wallet.Request(320)
-	sceneries, err := request.GetSceneries(wallet.Available())
+	choices, err := request.GetChoices(wallet.Available())
 	if nil != err {
 		t.Error(err.Error())
 	}
-	if l := len(sceneries); 1 != l {
-		t.Errorf("got %d sceneries, expected 1", l)
+	if l := len(choices); 1 != l {
+		t.Errorf("got %d choices, expected 1", l)
 		return
 	}
-	notes := sceneries[0].Pieces
+	notes := choices[0].Pieces
 	if num := len(notes); num != 2 {
 		t.Errorf("got %d notes, expected 2", num)
 	}
@@ -66,7 +66,7 @@ func TestRequest_SimpleScenery(t *testing.T) {
 	}
 }
 
-func TestRequest_ManySceneries(t *testing.T) {
+func TestRequest_ManyChoices(t *testing.T) {
 	wallet := cash.NewWallet()
 	wallet.Add(5, 1000)
 	wallet.Add(100, 1000)
@@ -74,12 +74,12 @@ func TestRequest_ManySceneries(t *testing.T) {
 	wallet.Add(50, 1000)
 	wallet.Add(20, 1000)
 	request, _ := wallet.Request(845)
-	sceneries, err := request.GetSceneries(wallet.Available())
+	choices, err := request.GetChoices(wallet.Available())
 	if nil != err {
 		t.Error(err.Error())
 	}
-	if l := len(sceneries); 3 != l {
-		t.Errorf("got %d sceneries, expected 3", l)
+	if l := len(choices); 3 != l {
+		t.Errorf("got %d choices, expected 3", l)
 		return
 	}
 	cases := []struct{ n []struct{ q, v int } }{
@@ -108,13 +108,13 @@ func TestRequest_ManySceneries(t *testing.T) {
 		},
 	}
 	for j, currentCase := range cases {
-		notes := sceneries[j].Pieces
+		notes := choices[j].Pieces
 		for i, v := range currentCase.n {
 			if notes[i].Quantity != v.q {
-				t.Errorf("Scenery %d: Quantity got %d x %d, expected %d", j, notes[i].Quantity, notes[i].Value, v.q)
+				t.Errorf("Choice %d: Quantity got %d x %d, expected %d", j, notes[i].Quantity, notes[i].Value, v.q)
 			}
 			if notes[i].Value != v.v {
-				t.Errorf("Scenery %d: Value got %d, expected %d", j, notes[i].Value, v.q)
+				t.Errorf("Choice %d: Value got %d, expected %d", j, notes[i].Value, v.q)
 			}
 		}
 	}

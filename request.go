@@ -12,20 +12,20 @@ type Request struct {
 	Value int
 }
 
-func (request *Request) GetSceneries(available Slots) ([]*Scenery, error) {
-	sceneries := make([]*Scenery, 0)
+func (request *Request) GetChoices(available Slots) ([]*Choice, error) {
+	choices := make([]*Choice, 0)
 	halfBase := 0
 	halfCount := 0
 	for i := 1; i <= SUGGEST_MAX; i++ {
-		scenery, rest := NewScenery(available, request.Value, halfBase)
+		choice, rest := NewChoice(available, request.Value, halfBase)
 		if 0 == rest {
-			sceneries = append(sceneries, scenery)
-			halfBase = scenery.Pieces[halfCount].Value
+			choices = append(choices, choice)
+			halfBase = choice.Pieces[halfCount].Value
 			halfCount++
 		}
 	}
-	if 0 == len(sceneries) {
-		return nil, errors.New("nothing sceneries")
+	if 0 == len(choices) {
+		return nil, errors.New("nothing choices")
 	}
-	return sceneries, nil
+	return choices, nil
 }
