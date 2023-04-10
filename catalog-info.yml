@@ -15,5 +15,6 @@ metadata:
       type: documentation
 
 spec:
+  type: service
   lifecycle: experimental
   owner: '@Isaque'
