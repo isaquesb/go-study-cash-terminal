@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: go-study-cash-terminal
+  description: Projeto visa calcular notas / configurações disponíveis do caixa para saques de valores
+  tags:
+    - golang
+    - poc
+  links:
+    - url: https://github.com/isaquesb/go-study-cash-terminal
+      title: Repositório GitHub
+      icon: github
+    - url: https://github.com/isaquesb/go-study-cash-terminal/blob/master/README.md
+      icon: docs
+      type: documentation
+
+spec:
+  lifecycle: experimental
+  owner: '@Isaque'
